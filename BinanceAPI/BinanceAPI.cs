@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -54,26 +55,64 @@ namespace APICall
             }
         }
 
-        //public async Task<HttpStatusCode> GetAllTrades()
-        //{
-        //    using (var request = new HttpRequestMessage(HttpMethod.Get, _url))
-        //    {
-        //        AddApiKey(request);
+        public async Task<HttpStatusCode> GetAccountInformation()
+        {
+            string parameters = "timestamp=" + Math.Truncate(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+            string hash = GetHash(parameters);
 
-        //        request.Content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+            using (var request = new HttpRequestMessage(HttpMethod.Get, _url + "/api/v3/account?" + parameters + "&signature=" + hash))
+            {
+                AddApiKey(request);
 
-        //        using (HttpResponseMessage httpResponse = await HttpClient.SendAsync(request))
-        //        {
-        //            string statusCode = httpResponse.StatusCode.ToString();
-        //            //Log.Debug("# HTTP RESPONSE : " + statusCode);
-        //            //if (statusCode != "OK")
-        //            //    Log.Error(httpResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult());
+                using (HttpResponseMessage httpResponse = HttpClient.Send(request))
+                {
+                    string statusCode = httpResponse.StatusCode.ToString();
 
-        //            return httpResponse.StatusCode;
-        //        }
-        //    }
+                    var strInfo = await httpResponse.Content.ReadAsStringAsync();
 
-        //}
+                    return httpResponse.StatusCode;
+                }
+            }
+
+        }
+
+        public async Task<HttpStatusCode> GetAllTrades()
+        {
+            string parameters = "symbol=EURUSDT" + "&timestamp=" + Math.Truncate(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+            string hash = GetHash(parameters);
+
+            using (var request = new HttpRequestMessage(HttpMethod.Get, _url + "/api/v3/allOrders?" + parameters + "&signature=" + hash))
+            {
+                AddApiKey(request);
+
+                using (HttpResponseMessage httpResponse = HttpClient.Send(request))
+                {
+                    string statusCode = httpResponse.StatusCode.ToString();
+
+                    var strInfo = await httpResponse.Content.ReadAsStringAsync();
+
+                    return httpResponse.StatusCode;
+                }
+            }
+
+        }
+
+        public String GetHash(String text)
+        {
+            // change according to your needs, an UTF8Encoding
+            // could be more suitable in certain situations
+            ASCIIEncoding encoding = new ASCIIEncoding();
+
+            Byte[] textBytes = encoding.GetBytes(text);
+            Byte[] keyBytes = encoding.GetBytes(_secret);
+
+            Byte[] hashBytes;
+
+            using (HMACSHA256 hash = new HMACSHA256(keyBytes))
+                hashBytes = hash.ComputeHash(textBytes);
+
+            return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+        }
 
         private void AddApiKey(HttpRequestMessage message)
         {
