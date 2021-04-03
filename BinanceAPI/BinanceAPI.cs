@@ -62,10 +62,10 @@ namespace APICall
 
         public async Task<HttpStatusCode> GetAccountInformation()
         {
-            string parameters = "timestamp=" + Math.Truncate(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
-            string hash = GetHash(parameters);
+            string parameters = await AddServerTime(false);
+            string allParameters = GetParametersWithHash(parameters);
 
-            using (var request = new HttpRequestMessage(HttpMethod.Get, "/api/v3/account?" + parameters + "&signature=" + hash))
+            using (var request = new HttpRequestMessage(HttpMethod.Get, "/api/v3/account?" + allParameters))
             {
                 AddApiKey(request);
 
@@ -83,10 +83,10 @@ namespace APICall
 
         public async Task<ReturnObject<AllOrders>> GetAllTrades(string symbol)
         {
-            string parameters = "symbol=" + symbol + "&recvWindow=50000&timestamp=" + await GetServerTime();
-            string hash = GetHash(parameters);
+            string parameters = "symbol=" + symbol + await AddServerTime();
+            string allParameters = GetParametersWithHash(parameters);
 
-            using (var request = new HttpRequestMessage(HttpMethod.Get, "/api/v3/allOrders?" + parameters + "&signature=" + hash))
+            using (var request = new HttpRequestMessage(HttpMethod.Get, "/api/v3/allOrders?" + allParameters))
             {
                 AddApiKey(request);
 
@@ -107,7 +107,8 @@ namespace APICall
                     else
                     {
                         var strInfo = await httpResponse.Content.ReadAsStringAsync();
-                        AllOrders allOrders = JsonConvert.DeserializeObject<AllOrders>(strInfo);
+                        List<AllOrdersObject> list = JsonConvert.DeserializeObject<List<AllOrdersObject>>(strInfo);
+                        AllOrders allOrders = new AllOrders() { AllordersList = list };
                         
                         return new ReturnObject<AllOrders>(httpResponse.StatusCode, allOrders);
                     }
@@ -116,23 +117,19 @@ namespace APICall
 
         }
 
-        //public async Task<long> GetTime()
-        //{
-        //    long localTime = GetLocalTime();
-        //    long serverTime = await GetServerTime();
+        #region Méthodes privées
+        #region Gestion du Temps
+        private async Task<string> AddServerTime(bool add = true)
+        {
+            return (add ? "&" : string.Empty) + "recvWindow=5000&timestamp=" + await GetServerTime();
+        }
 
-        //    if (localTime < serverTime)
-        //    {
-        //        return serverTime;
-        //    }
-        //}
-
-        public long GetLocalTime()
+        private long GetLocalTime()
         {
             return (long)Math.Truncate(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
         }
 
-        public async Task<string> GetServerTime ()
+        private async Task<string> GetServerTime ()
         {
             var binanceTime = await HttpClient.GetAsync("/api/v1/time");
             if (binanceTime.IsSuccessStatusCode)
@@ -145,8 +142,16 @@ namespace APICall
 
             return GetLocalTime().ToString();
         }
+        #endregion
 
-        public String GetHash(String text)
+        private string GetParametersWithHash(string parameters)
+        {
+            string hash = GetHash(parameters);
+
+            return parameters + "&signature=" + hash;
+        }
+
+        private String GetHash(String text)
         {
             // change according to your needs, an UTF8Encoding
             // could be more suitable in certain situations
@@ -177,6 +182,6 @@ namespace APICall
 
             return val;
         }
-
+        #endregion
     }
 }

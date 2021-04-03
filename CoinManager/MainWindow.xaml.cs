@@ -1,4 +1,5 @@
 ﻿using APICall;
+using CoinManager.Component;
 using CoinManager.Entities;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -70,17 +71,42 @@ namespace CoinBase
                 //}
             }
 
+            Calculate(dicoOrders);
 
+            Show(dicoOrders);
+        }
+
+        private void Show(Dictionary<string, AllOrders> dicoOrders)
+        {
+            stackMain.Children.Clear();
+
+            foreach (var pair in dicoOrders)
+            {
+                ValeurCrypto valeurCrypto = new ValeurCrypto(pair.Key, pair.Value);
+                stackMain.Children.Add(valeurCrypto);
+            }
+        }
+
+        private void Calculate(Dictionary<string, AllOrders> dicoOrders)
+        {
+            foreach (var pair in dicoOrders)
+            {
+                AllOrders allOrders = pair.Value;
+
+                foreach (var order in allOrders.AllordersList)
+                {
+                    if (order.Side == "BUY" && order.Status == "FILLED")
+                    {
+                        allOrders.Nombre += double.Parse(order.ExecutedQty.Replace(".", ","));
+                        allOrders.Valeur += double.Parse(order.CummulativeQuoteQty.Replace(".", ","));
+                    }
+                }
+            }
         }
 
         private void DisableAllRequest()
         {
             ButtonCall.IsEnabled = false;
-        }
-
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }
