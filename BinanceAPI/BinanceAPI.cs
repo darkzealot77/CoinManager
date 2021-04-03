@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using CoinManager.Entities;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -27,13 +30,15 @@ namespace APICall
             _url = GetConfiguration("Binance:Url");
             _apiKey = GetConfiguration("Binance:ApiKey");
             _secret = GetConfiguration("Binance:Secret");
+
+            httpClient.BaseAddress = new Uri(_url);
         }
 
         public async Task<HttpStatusCode> GetHistoricalTrades()
         {
             try
             {
-                using (var request = new HttpRequestMessage(HttpMethod.Get, _url + "/api/v3/historicalTrades?symbol=ADAUSDT"))
+                using (var request = new HttpRequestMessage(HttpMethod.Get, "/api/v3/historicalTrades?symbol=ADAUSDT"))
                 {
                     AddApiKey(request);
 
@@ -60,7 +65,7 @@ namespace APICall
             string parameters = "timestamp=" + Math.Truncate(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
             string hash = GetHash(parameters);
 
-            using (var request = new HttpRequestMessage(HttpMethod.Get, _url + "/api/v3/account?" + parameters + "&signature=" + hash))
+            using (var request = new HttpRequestMessage(HttpMethod.Get, "/api/v3/account?" + parameters + "&signature=" + hash))
             {
                 AddApiKey(request);
 
@@ -76,25 +81,69 @@ namespace APICall
 
         }
 
-        public async Task<HttpStatusCode> GetAllTrades()
+        public async Task<ReturnObject<AllOrders>> GetAllTrades(string symbol)
         {
-            string parameters = "symbol=EURUSDT" + "&timestamp=" + Math.Truncate(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+            string parameters = "symbol=" + symbol + "&recvWindow=50000&timestamp=" + await GetServerTime();
             string hash = GetHash(parameters);
 
-            using (var request = new HttpRequestMessage(HttpMethod.Get, _url + "/api/v3/allOrders?" + parameters + "&signature=" + hash))
+            using (var request = new HttpRequestMessage(HttpMethod.Get, "/api/v3/allOrders?" + parameters + "&signature=" + hash))
             {
                 AddApiKey(request);
 
                 using (HttpResponseMessage httpResponse = HttpClient.Send(request))
                 {
-                    string statusCode = httpResponse.StatusCode.ToString();
+                    if (httpResponse.StatusCode.ToString() == "418" || httpResponse.StatusCode.ToString() == "429")
+                    {
+                        string strSecond = ((List<string>)httpResponse.Headers.GetValues("Retry-After")).FirstOrDefault();
+                        int retryAfterS = int.Parse(strSecond);
 
-                    var strInfo = await httpResponse.Content.ReadAsStringAsync();
-
-                    return httpResponse.StatusCode;
+                        return new ReturnObject<AllOrders>(httpResponse.StatusCode, null, retryAfterS);
+                    }
+                    else if (httpResponse.StatusCode != HttpStatusCode.OK)
+                    {
+                        var strInfo = await httpResponse.Content.ReadAsStringAsync();
+                        return new ReturnObject<AllOrders>(httpResponse.StatusCode, null, 10) { Error = strInfo };
+                    }
+                    else
+                    {
+                        var strInfo = await httpResponse.Content.ReadAsStringAsync();
+                        AllOrders allOrders = JsonConvert.DeserializeObject<AllOrders>(strInfo);
+                        
+                        return new ReturnObject<AllOrders>(httpResponse.StatusCode, allOrders);
+                    }
                 }
             }
 
+        }
+
+        //public async Task<long> GetTime()
+        //{
+        //    long localTime = GetLocalTime();
+        //    long serverTime = await GetServerTime();
+
+        //    if (localTime < serverTime)
+        //    {
+        //        return serverTime;
+        //    }
+        //}
+
+        public long GetLocalTime()
+        {
+            return (long)Math.Truncate(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds);
+        }
+
+        public async Task<string> GetServerTime ()
+        {
+            var binanceTime = await HttpClient.GetAsync("/api/v1/time");
+            if (binanceTime.IsSuccessStatusCode)
+            {
+                var serverTime = await binanceTime.Content.ReadAsStringAsync();
+                BinanceServerTime binanceServerTime = JsonConvert.DeserializeObject<BinanceServerTime>(serverTime);
+
+                return binanceServerTime.serverTime.ToString();
+            }
+
+            return GetLocalTime().ToString();
         }
 
         public String GetHash(String text)

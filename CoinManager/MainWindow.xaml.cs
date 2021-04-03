@@ -1,4 +1,6 @@
 ﻿using APICall;
+using CoinManager.Entities;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,25 +25,62 @@ namespace CoinBase
     public partial class MainWindow : Window
     {
         BinanceAPI _binanceAPI;
+        IConfiguration Configuration;
+        List<string> SymbolList { get; set; } = new List<string>();
 
-        public MainWindow(BinanceAPI binanceAPI)
+        public MainWindow(BinanceAPI binanceAPI, IConfiguration configuration)
         {
             InitializeComponent();
 
             _binanceAPI = binanceAPI;
+            Configuration = configuration;
+
+            List<KeyValuePair<string, string>> sectionValues = configuration.GetSection("SymbolList")
+                    .AsEnumerable()
+                    .Where(p => p.Value != null)
+                    .ToList();
+
+            foreach (var pair in sectionValues)
+            {
+                SymbolList.Add(pair.Value);
+            }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
-            var code = _binanceAPI.GetAccountInformation().GetAwaiter().GetResult();
+            Dictionary<string, AllOrders> dicoOrders = new Dictionary<string, AllOrders>();
 
-            if (code == HttpStatusCode.TooManyRequests)
-                DisableAllRequest();
+            foreach (string symbol in SymbolList)
+            {
+                var returnObject = await _binanceAPI.GetAllTrades(symbol);
+
+                if (returnObject.RetryAfter > 0)
+                {
+                    DisableAllRequest();
+                    break;
+                }
+
+                if (returnObject.Code == HttpStatusCode.OK)
+                { 
+                    dicoOrders.Add(symbol, returnObject.Value);
+                }
+                //else
+                //{
+                //    returnObject.Error;
+                //}
+            }
+
+
         }
 
         private void DisableAllRequest()
         {
             ButtonCall.IsEnabled = false;
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }
