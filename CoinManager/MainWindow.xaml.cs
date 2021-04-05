@@ -132,6 +132,11 @@ namespace CoinBase
                         allOrders.Nombre += double.Parse(order.ExecutedQty.Replace(".", ","));
                         allOrders.Valeur += double.Parse(order.CummulativeQuoteQty.Replace(".", ","));
                     }
+                    else if (order.Side == "SELL" && order.Status == "FILLED")
+                    {
+                        allOrders.Nombre -= double.Parse(order.ExecutedQty.Replace(".", ","));
+                        allOrders.Valeur -= double.Parse(order.CummulativeQuoteQty.Replace(".", ","));
+                    }
                 }
             }
         }
