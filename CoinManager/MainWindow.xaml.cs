@@ -29,6 +29,8 @@ namespace CoinBase
         IConfiguration Configuration;
         List<string> SymbolList { get; set; } = new List<string>();
 
+        Dictionary<string, AllOrders> DicoOrders { get; set; } = new Dictionary<string, AllOrders>();
+
         public MainWindow(BinanceAPI binanceAPI, IConfiguration configuration)
         {
             InitializeComponent();
@@ -47,10 +49,8 @@ namespace CoinBase
             }
         }
 
-        private async void Button_Click(object sender, RoutedEventArgs e)
+        private async void ButtonOrders_Click(object sender, RoutedEventArgs e)
         {
-            Dictionary<string, AllOrders> dicoOrders = new Dictionary<string, AllOrders>();
-
             foreach (string symbol in SymbolList)
             {
                 var returnObject = await _binanceAPI.GetAllTrades(symbol);
@@ -62,8 +62,8 @@ namespace CoinBase
                 }
 
                 if (returnObject.Code == HttpStatusCode.OK)
-                { 
-                    dicoOrders.Add(symbol, returnObject.Value);
+                {
+                    DicoOrders.Add(symbol, returnObject.Value);
                 }
                 //else
                 //{
@@ -71,14 +71,46 @@ namespace CoinBase
                 //}
             }
 
-            Calculate(dicoOrders);
+            Calculate(DicoOrders);
 
-            Show(dicoOrders);
+            await GetMarketPrice(DicoOrders);
+
+            Show(DicoOrders);
+        }
+
+        private async void ButtonPrices_Click(object sender, RoutedEventArgs e)
+        {
+            await GetMarketPrice(DicoOrders);
+
+            Show(DicoOrders);
+        }
+
+        private async Task GetMarketPrice(Dictionary<string, AllOrders> dicoOrders)
+        {
+            foreach (var pair in dicoOrders)
+            {
+                var returnObject = await _binanceAPI.GetMarketPrice(pair.Key);
+
+                if (returnObject.RetryAfter > 0)
+                {
+                    DisableAllRequest();
+                    break;
+                }
+
+                if (returnObject.Code == HttpStatusCode.OK)
+                {
+                    var crypto = pair.Value;
+
+                    crypto.Cours = returnObject.Value.price;
+                    crypto.Difference = (crypto.Cours * crypto.Nombre) - (crypto.Moyenne * crypto.Nombre);
+                }
+            }
         }
 
         private void Show(Dictionary<string, AllOrders> dicoOrders)
         {
             stackMain.Children.Clear();
+            stackMain.Children.Add(new TitreValeurCrypto());
 
             foreach (var pair in dicoOrders)
             {
@@ -106,7 +138,8 @@ namespace CoinBase
 
         private void DisableAllRequest()
         {
-            ButtonCall.IsEnabled = false;
+            ButtonOrders.IsEnabled = false;
+            ButtonPrices.IsEnabled = false;
         }
     }
 }

@@ -117,6 +117,38 @@ namespace APICall
 
         }
 
+        public async Task<ReturnObject<CurrentAveragePrice>> GetMarketPrice(string symbol)
+        {
+            string parameters = "symbol=" + symbol;
+
+            using (var request = new HttpRequestMessage(HttpMethod.Get, "/api/v3/avgPrice?" + parameters))
+            {
+                using (HttpResponseMessage httpResponse = HttpClient.Send(request))
+                {
+                    if (httpResponse.StatusCode.ToString() == "418" || httpResponse.StatusCode.ToString() == "429")
+                    {
+                        string strSecond = ((List<string>)httpResponse.Headers.GetValues("Retry-After")).FirstOrDefault();
+                        int retryAfterS = int.Parse(strSecond);
+
+                        return new ReturnObject<CurrentAveragePrice>(httpResponse.StatusCode, null, retryAfterS);
+                    }
+                    else if (httpResponse.StatusCode != HttpStatusCode.OK)
+                    {
+                        var strInfo = await httpResponse.Content.ReadAsStringAsync();
+                        return new ReturnObject<CurrentAveragePrice>(httpResponse.StatusCode, null, 10) { Error = strInfo };
+                    }
+                    else
+                    {
+                        var strInfo = await httpResponse.Content.ReadAsStringAsync();
+                        CurrentAveragePrice price = JsonConvert.DeserializeObject<CurrentAveragePrice>(strInfo);
+
+                        return new ReturnObject<CurrentAveragePrice>(httpResponse.StatusCode, price);
+                    }
+                }
+            }
+
+        }
+
         #region Méthodes privées
         #region Gestion du Temps
         private async Task<string> AddServerTime(bool add = true)

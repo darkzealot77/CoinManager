@@ -28,4 +28,17 @@
     <ProjectReference Include="..\BinanceAPI\APICall.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Component\TitreValeurCrypto.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Component\TitreValeurCrypto.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
 </Project>

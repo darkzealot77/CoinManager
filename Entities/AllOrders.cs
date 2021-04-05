@@ -22,6 +22,9 @@ namespace CoinManager.Entities
             }
         }
 
+        public double Cours { get; set; }
+        public double Difference { get; set; }
+
         public List<AllOrdersObject> AllordersList { get; set; }
     }
 }

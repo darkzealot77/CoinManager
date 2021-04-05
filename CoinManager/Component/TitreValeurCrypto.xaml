@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="CoinManager.Component.ValeurCrypto"
+﻿<UserControl x:Class="CoinManager.Component.TitreValeurCrypto"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -7,11 +7,11 @@
              mc:Ignorable="d" 
              d:DesignHeight="30" d:DesignWidth="600">
     <StackPanel Orientation="Horizontal">
-        <Label Content="{Binding Symbol}" Width="100"></Label>
-        <Label Content="{Binding NombreStr}" Width="100"></Label>
-        <Label Content="{Binding ValeurStr}" Width="100"></Label>
-        <Label Content="{Binding MoyenneStr}" Width="100"></Label>
-        <Label Content="{Binding CoursStr}" Width="100"></Label>
-        <Label Content="{Binding DiffStr}" Width="100"></Label>
+        <Label Content="Symbol" Width="100"></Label>
+        <Label Content="Quantité" Width="100"></Label>
+        <Label Content="Valeur" Width="100"></Label>
+        <Label Content="Moyenne" Width="100"></Label>
+        <Label Content="Cours" Width="100"></Label>
+        <Label Content="Diff" Width="100"></Label>
     </StackPanel>
 </UserControl>

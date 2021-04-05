@@ -64,6 +64,16 @@ namespace CoinManager.Component
             }
         }
 
+        public double Diff { get; set; }
+
+        public string DiffStr
+        {
+            get
+            {
+                return String.Format("{0:N4}", Diff);
+            }
+        }
+
         public ValeurCrypto()
         {
             InitializeComponent();
@@ -77,6 +87,8 @@ namespace CoinManager.Component
             Valeur = value.Valeur;
             Nombre = value.Nombre;
             Moyenne = value.Moyenne;
+            Cours = value.Cours;
+            Diff = value.Difference;
         }
     }
 }

@@ -8,7 +8,10 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <StackPanel>
-        <Button x:Name="ButtonCall" Content="Recup tous les ordres" HorizontalAlignment="center" Margin="10" VerticalAlignment="Top" Click="Button_Click" Width="170"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="center">
+            <Button x:Name="ButtonOrders" Content="Recup tous les ordres" Margin="10" VerticalAlignment="Top" Click="ButtonOrders_Click" Width="170"/>
+            <Button x:Name="ButtonPrices" Content="Recup tous les prix" Margin="10" VerticalAlignment="Top" Click="ButtonPrices_Click" Width="170"/>
+        </StackPanel>
         <StackPanel x:Name="stackMain" Margin="10" Height="366">
 
         </StackPanel>
