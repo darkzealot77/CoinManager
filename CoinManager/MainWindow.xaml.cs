@@ -57,6 +57,11 @@ namespace CoinBase
             AllOrders = _fileStockService.Load().GetAwaiter().GetResult();
             if (AllOrders == null)
                 AllOrders = new DicoOrders();
+
+            Calculate();
+
+            ShowRecap();
+            ShowOrder();
         }
 
         private async void ButtonOrders_Click(object sender, RoutedEventArgs e)
@@ -70,7 +75,10 @@ namespace CoinBase
             await GetMarketPrice();
 
             ShowRecap();
+
+            ShowOrder();
         }
+
 
         private async Task GetTrades()
         {
@@ -147,14 +155,29 @@ namespace CoinBase
 
         private void ShowRecap()
         {
-            stackMain.Children.Clear();
-            stackMain.Children.Add(new TitreValeurCrypto());
+            stackRecap.Children.Clear();
+            stackRecap.Children.Add(new TitreValeurCrypto());
 
             foreach (var pair in AllRecap)
             {
                 ValeurCrypto valeurCrypto = new ValeurCrypto(pair.Key, pair.Value);
-                stackMain.Children.Add(valeurCrypto);
+                stackRecap.Children.Add(valeurCrypto);
             }
+        }
+
+        private void ShowOrder()
+        {
+            List<OrderGridRow> lignes = new List<OrderGridRow>();
+
+            foreach (var symbolOrders in AllOrders)
+            {
+                foreach (var order in symbolOrders.Value)
+                {
+                    lignes.Add(new OrderGridRow(order.Value));
+                }
+            }
+
+            dataGridOrder.ItemsSource = lignes;
         }
 
         private void Calculate()

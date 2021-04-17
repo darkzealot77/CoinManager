@@ -6,14 +6,22 @@
         xmlns:local="clr-namespace:CoinBase"
         xmlns:Component="clr-namespace:CoinManager.Component" x:Class="CoinBase.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" WindowStartupLocation="CenterScreen">
+        Title="MainWindow" Height="600" Width="1000" WindowStartupLocation="CenterScreen">
     <StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="center">
             <Button x:Name="ButtonOrders" Content="Recup tous les ordres" Margin="10" VerticalAlignment="Top" Click="ButtonOrders_Click" Width="170"/>
             <Button x:Name="ButtonPrices" Content="Recup tous les prix" Margin="10" VerticalAlignment="Top" Click="ButtonPrices_Click" Width="170"/>
         </StackPanel>
-        <StackPanel x:Name="stackMain" Margin="10" Height="366">
-
-        </StackPanel>
+        <TabControl>
+            <TabItem Header="Recap">
+                <StackPanel x:Name="stackRecap" Margin="10" Height="500">
+                </StackPanel>   
+            </TabItem>
+            <TabItem Header="Tous les ordres">
+                <StackPanel x:Name="stackOrdre" Margin="10" Height="480">
+                    <DataGrid x:Name="dataGridOrder" Height="480"/>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
     </StackPanel>
 </Window>
