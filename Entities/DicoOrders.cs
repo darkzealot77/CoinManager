@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CoinManager.Entities.Binance;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,10 +7,8 @@ using System.Threading.Tasks;
 
 namespace CoinManager.Entities
 {
-    public class CurrentAveragePrice
+    public class DicoOrders : Dictionary<string, Dictionary<long, BinOrder>>
     {
-        public double mins { get; set; }
 
-        public double price { get; set; }
     }
 }

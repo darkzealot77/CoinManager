@@ -1,6 +1,8 @@
 ﻿using APICall;
 using CoinManager.Component;
 using CoinManager.Entities;
+using CoinManager.Entities.Binance;
+using CoinManager.Services;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -26,17 +28,20 @@ namespace CoinBase
     public partial class MainWindow : Window
     {
         BinanceAPI _binanceAPI;
+        FileOrdersService _fileStockService;
         IConfiguration Configuration;
         List<string> SymbolList { get; set; } = new List<string>();
 
-        Dictionary<string, AllOrders> DicoOrders { get; set; } = new Dictionary<string, AllOrders>();
+        public DicoOrders AllOrders { get; set; }
+        public Dictionary<string, SymbolRecap> AllRecap { get; set; } = new Dictionary<string, SymbolRecap>();
 
-        public MainWindow(BinanceAPI binanceAPI, IConfiguration configuration)
+        public MainWindow(BinanceAPI binanceAPI, FileOrdersService fileStockService, IConfiguration configuration)
         {
             InitializeComponent();
 
             _binanceAPI = binanceAPI;
             Configuration = configuration;
+            _fileStockService = fileStockService;
 
             List<KeyValuePair<string, string>> sectionValues = configuration.GetSection("SymbolList")
                     .AsEnumerable()
@@ -46,14 +51,43 @@ namespace CoinBase
             foreach (var pair in sectionValues)
             {
                 SymbolList.Add(pair.Value);
+                AllRecap.Add(pair.Value, new SymbolRecap());
             }
+
+            AllOrders = _fileStockService.Load().GetAwaiter().GetResult();
+            if (AllOrders == null)
+                AllOrders = new DicoOrders();
         }
 
         private async void ButtonOrders_Click(object sender, RoutedEventArgs e)
         {
+            await GetTrades();
+
+            await SaveTrades();
+
+            Calculate();
+
+            await GetMarketPrice();
+
+            ShowRecap();
+        }
+
+        private async Task GetTrades()
+        {
             foreach (string symbol in SymbolList)
             {
-                var returnObject = await _binanceAPI.GetAllTrades(symbol);
+                ReturnObject<List<BinOrder>> returnObject;
+
+                // Récupération tous les ordres ou les derniers seulement
+                if (AllOrders != null)
+                {
+                    if (AllOrders.ContainsKey(symbol))
+                        returnObject = await _binanceAPI.GetLastTrades(symbol, AllOrders[symbol].Select(x => x.Key).Max());
+                    else
+                        returnObject = await _binanceAPI.GetAllTrades(symbol);
+                }
+                else
+                    returnObject = await _binanceAPI.GetAllTrades(symbol);
 
                 if (returnObject.RetryAfter > 0)
                 {
@@ -63,31 +97,35 @@ namespace CoinBase
 
                 if (returnObject.Code == HttpStatusCode.OK)
                 {
-                    DicoOrders.Add(symbol, returnObject.Value);
+                    if (!AllOrders.ContainsKey(symbol))
+                        AllOrders.Add(symbol, new Dictionary<long, BinOrder>());
+
+                    foreach (var order in returnObject.Value)
+                    {
+                        if (!AllOrders[order.Symbol].ContainsKey(order.OrderId))
+                            AllOrders[order.Symbol].Add(order.OrderId, order);
+                    }
                 }
-                //else
-                //{
-                //    returnObject.Error;
-                //}
             }
+        }
 
-            Calculate(DicoOrders);
-
-            await GetMarketPrice(DicoOrders);
-
-            Show(DicoOrders);
+        private async Task SaveTrades()
+        {
+            await _fileStockService.Save(AllOrders);
         }
 
         private async void ButtonPrices_Click(object sender, RoutedEventArgs e)
         {
-            await GetMarketPrice(DicoOrders);
+            await GetMarketPrice();
 
-            Show(DicoOrders);
+            Calculate();
+
+            ShowRecap();
         }
 
-        private async Task GetMarketPrice(Dictionary<string, AllOrders> dicoOrders)
+        private async Task GetMarketPrice()
         {
-            foreach (var pair in dicoOrders)
+            foreach (var pair in AllOrders)
             {
                 var returnObject = await _binanceAPI.GetMarketPrice(pair.Key);
 
@@ -99,43 +137,47 @@ namespace CoinBase
 
                 if (returnObject.Code == HttpStatusCode.OK)
                 {
-                    var crypto = pair.Value;
+                    SymbolRecap symbolRecap = AllRecap[pair.Key];
 
-                    crypto.Cours = returnObject.Value.price;
-                    crypto.Difference = (crypto.Cours * crypto.Nombre) - (crypto.Moyenne * crypto.Nombre);
+                    symbolRecap.Cours = returnObject.Value.price;
+                    symbolRecap.Difference = (symbolRecap.Cours * symbolRecap.Nombre) - (symbolRecap.Moyenne * symbolRecap.Nombre);
                 }
             }
         }
 
-        private void Show(Dictionary<string, AllOrders> dicoOrders)
+        private void ShowRecap()
         {
             stackMain.Children.Clear();
             stackMain.Children.Add(new TitreValeurCrypto());
 
-            foreach (var pair in dicoOrders)
+            foreach (var pair in AllRecap)
             {
                 ValeurCrypto valeurCrypto = new ValeurCrypto(pair.Key, pair.Value);
                 stackMain.Children.Add(valeurCrypto);
             }
         }
 
-        private void Calculate(Dictionary<string, AllOrders> dicoOrders)
+        private void Calculate()
         {
-            foreach (var pair in dicoOrders)
+            foreach (var pair in AllOrders)
             {
-                AllOrders allOrders = pair.Value;
+                SymbolRecap symbolRecap = AllRecap[pair.Key];
+                symbolRecap.Nombre = 0;
+                symbolRecap.Valeur = 0;
 
-                foreach (var order in allOrders.AllordersList)
+                foreach (var pairOrder in pair.Value)
                 {
-                    if (order.Side == "BUY" && order.Status == "FILLED")
+                    BinOrder binOrder = pairOrder.Value;
+
+                    if (binOrder.Side == "BUY" && binOrder.Status == "FILLED")
                     {
-                        allOrders.Nombre += double.Parse(order.ExecutedQty.Replace(".", ","));
-                        allOrders.Valeur += double.Parse(order.CummulativeQuoteQty.Replace(".", ","));
+                        symbolRecap.Nombre += double.Parse(binOrder.ExecutedQty.Replace(".", ","));
+                        symbolRecap.Valeur += double.Parse(binOrder.CummulativeQuoteQty.Replace(".", ","));
                     }
-                    else if (order.Side == "SELL" && order.Status == "FILLED")
+                    else if (binOrder.Side == "SELL" && binOrder.Status == "FILLED")
                     {
-                        allOrders.Nombre -= double.Parse(order.ExecutedQty.Replace(".", ","));
-                        allOrders.Valeur -= double.Parse(order.CummulativeQuoteQty.Replace(".", ","));
+                        symbolRecap.Nombre -= double.Parse(binOrder.ExecutedQty.Replace(".", ","));
+                        symbolRecap.Valeur -= double.Parse(binOrder.CummulativeQuoteQty.Replace(".", ","));
                     }
                 }
             }

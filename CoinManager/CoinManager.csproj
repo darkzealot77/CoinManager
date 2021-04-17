@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BinanceAPI\APICall.csproj" />
+    <ProjectReference Include="..\CoinManager.Services\CoinManager.Services.csproj" />
   </ItemGroup>
 
   <ItemGroup>

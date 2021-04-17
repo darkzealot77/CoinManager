@@ -1,4 +1,5 @@
 ﻿using APICall;
+using CoinManager.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -41,6 +42,7 @@ namespace CoinBase
             services.AddHttpClient<BinanceAPI>();
 
             services.AddSingleton<MainWindow>();
+            services.AddTransient<FileOrdersService>();
 
             services.AddSingleton<IConfiguration>(Configuration);
         }

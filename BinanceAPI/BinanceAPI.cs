@@ -1,4 +1,5 @@
 ﻿using CoinManager.Entities;
+using CoinManager.Entities.Binance;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
@@ -81,11 +82,24 @@ namespace APICall
 
         }
 
-        public async Task<ReturnObject<AllOrders>> GetAllTrades(string symbol)
+        public async Task<ReturnObject<List<BinOrder>>> GetAllTrades(string symbol)
         {
             string parameters = "symbol=" + symbol + await AddServerTime();
             string allParameters = GetParametersWithHash(parameters);
 
+            return await GetTrades(allParameters);
+        }
+
+        public async Task<ReturnObject<List<BinOrder>>> GetLastTrades(string symbol, long lastOrderId)
+        {
+            string parameters = "symbol=" + symbol + "&orderId=" + lastOrderId + await AddServerTime();
+            string allParameters = GetParametersWithHash(parameters);
+
+            return await GetTrades(allParameters);
+        }
+
+        public async Task<ReturnObject<List<BinOrder>>> GetTrades(string allParameters)
+        { 
             using (var request = new HttpRequestMessage(HttpMethod.Get, "/api/v3/allOrders?" + allParameters))
             {
                 AddApiKey(request);
@@ -97,27 +111,25 @@ namespace APICall
                         string strSecond = ((List<string>)httpResponse.Headers.GetValues("Retry-After")).FirstOrDefault();
                         int retryAfterS = int.Parse(strSecond);
 
-                        return new ReturnObject<AllOrders>(httpResponse.StatusCode, null, retryAfterS);
+                        return new ReturnObject<List<BinOrder>>(httpResponse.StatusCode, null, retryAfterS);
                     }
                     else if (httpResponse.StatusCode != HttpStatusCode.OK)
                     {
                         var strInfo = await httpResponse.Content.ReadAsStringAsync();
-                        return new ReturnObject<AllOrders>(httpResponse.StatusCode, null, 10) { Error = strInfo };
+                        return new ReturnObject<List<BinOrder>>(httpResponse.StatusCode, null, 10) { Error = strInfo };
                     }
                     else
                     {
                         var strInfo = await httpResponse.Content.ReadAsStringAsync();
-                        List<AllOrdersObject> list = JsonConvert.DeserializeObject<List<AllOrdersObject>>(strInfo);
-                        AllOrders allOrders = new AllOrders() { AllordersList = list };
+                        List<BinOrder> allOrders = JsonConvert.DeserializeObject<List<BinOrder>>(strInfo);
                         
-                        return new ReturnObject<AllOrders>(httpResponse.StatusCode, allOrders);
+                        return new ReturnObject<List<BinOrder>>(httpResponse.StatusCode, allOrders);
                     }
                 }
             }
-
         }
 
-        public async Task<ReturnObject<CurrentAveragePrice>> GetMarketPrice(string symbol)
+        public async Task<ReturnObject<BinMarketPrice>> GetMarketPrice(string symbol)
         {
             string parameters = "symbol=" + symbol;
 
@@ -130,19 +142,19 @@ namespace APICall
                         string strSecond = ((List<string>)httpResponse.Headers.GetValues("Retry-After")).FirstOrDefault();
                         int retryAfterS = int.Parse(strSecond);
 
-                        return new ReturnObject<CurrentAveragePrice>(httpResponse.StatusCode, null, retryAfterS);
+                        return new ReturnObject<BinMarketPrice>(httpResponse.StatusCode, null, retryAfterS);
                     }
                     else if (httpResponse.StatusCode != HttpStatusCode.OK)
                     {
                         var strInfo = await httpResponse.Content.ReadAsStringAsync();
-                        return new ReturnObject<CurrentAveragePrice>(httpResponse.StatusCode, null, 10) { Error = strInfo };
+                        return new ReturnObject<BinMarketPrice>(httpResponse.StatusCode, null, 10) { Error = strInfo };
                     }
                     else
                     {
                         var strInfo = await httpResponse.Content.ReadAsStringAsync();
-                        CurrentAveragePrice price = JsonConvert.DeserializeObject<CurrentAveragePrice>(strInfo);
+                        BinMarketPrice price = JsonConvert.DeserializeObject<BinMarketPrice>(strInfo);
 
-                        return new ReturnObject<CurrentAveragePrice>(httpResponse.StatusCode, price);
+                        return new ReturnObject<BinMarketPrice>(httpResponse.StatusCode, price);
                     }
                 }
             }
@@ -167,7 +179,7 @@ namespace APICall
             if (binanceTime.IsSuccessStatusCode)
             {
                 var serverTime = await binanceTime.Content.ReadAsStringAsync();
-                BinanceServerTime binanceServerTime = JsonConvert.DeserializeObject<BinanceServerTime>(serverTime);
+                BinServerTime binanceServerTime = JsonConvert.DeserializeObject<BinServerTime>(serverTime);
 
                 return binanceServerTime.serverTime.ToString();
             }

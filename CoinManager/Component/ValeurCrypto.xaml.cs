@@ -80,7 +80,7 @@ namespace CoinManager.Component
             this.DataContext = this;
         }
 
-        public ValeurCrypto(string key, AllOrders value)
+        public ValeurCrypto(string key, SymbolRecap value)
             :this()
         {
             Symbol = key;

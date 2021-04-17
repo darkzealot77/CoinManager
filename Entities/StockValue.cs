@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CoinManager.Entities
 {
-    public class AllOrders
+    public class StockValue
     {
         public double Valeur { get; set; }
 
@@ -22,9 +22,6 @@ namespace CoinManager.Entities
             }
         }
 
-        public double Cours { get; set; }
-        public double Difference { get; set; }
-
-        public List<AllOrdersObject> AllordersList { get; set; }
+        public long LastOrderId { get; set; } 
     }
 }

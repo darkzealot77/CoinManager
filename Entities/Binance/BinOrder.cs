@@ -5,9 +5,9 @@ using System.Globalization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace CoinManager.Entities
+namespace CoinManager.Entities.Binance
 {
-    public partial class AllOrdersObject
+    public partial class BinOrder
     {
         [JsonProperty("symbol")]
         public string Symbol { get; set; }

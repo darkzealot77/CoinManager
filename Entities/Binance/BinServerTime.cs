@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CoinManager.Entities
+namespace CoinManager.Entities.Binance
 {
-    public class BinanceServerTime
+    public class BinServerTime
     {
         public long serverTime { get; set; }
     }
