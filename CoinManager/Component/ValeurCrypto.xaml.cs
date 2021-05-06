@@ -22,7 +22,7 @@ namespace CoinManager.Component
     /// </summary>
     public partial class ValeurCrypto : UserControl
     {
-        public double Valeur { get; set; }
+        public decimal Valeur { get; set; }
 
         public string ValeurStr
         {
@@ -32,7 +32,7 @@ namespace CoinManager.Component
             }
         }
 
-        public double Nombre { get; set; }
+        public decimal Nombre { get; set; }
 
         public string NombreStr
         {
@@ -42,7 +42,7 @@ namespace CoinManager.Component
             }
         }
 
-        public double Moyenne { get; set; }
+        public decimal Moyenne { get; set; }
 
         public string MoyenneStr
         {
@@ -54,7 +54,7 @@ namespace CoinManager.Component
 
         public string Symbol { get; set; }
 
-        public double Cours { get; set; }
+        public decimal Cours { get; set; }
 
         public string CoursStr
         {
@@ -64,7 +64,7 @@ namespace CoinManager.Component
             }
         }
 
-        public double Diff { get; set; }
+        public decimal Diff { get; set; }
 
         public string DiffStr
         {

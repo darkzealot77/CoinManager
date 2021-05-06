@@ -6,24 +6,25 @@
         xmlns:local="clr-namespace:CoinBase"
         xmlns:Component="clr-namespace:CoinManager.Component" x:Class="CoinBase.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="1000" WindowStartupLocation="CenterScreen">
+        Title="MainWindow" Height="600" Width="900" WindowStartupLocation="CenterScreen">
     <StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="center">
             <Button x:Name="ButtonOrders" Content="Recup tous les ordres" Margin="10" VerticalAlignment="Top" Click="ButtonOrders_Click" Width="170"/>
             <Button x:Name="ButtonPrices" Content="Recup tous les prix" Margin="10" VerticalAlignment="Top" Click="ButtonPrices_Click" Width="170"/>
         </StackPanel>
-        <TabControl>
+        <TabControl VerticalAlignment="Stretch">
             <TabItem Header="Recap">
                 <StackPanel x:Name="stackRecap" Margin="10" Height="500">
                 </StackPanel>
             </TabItem>
             <TabItem Header="Tous les ordres">
-                <StackPanel x:Name="stackSymbol" Margin="10" Height="480">
+                <StackPanel x:Name="stackSymbol" Margin="10" VerticalAlignment="Stretch">
                     <StackPanel Orientation="Horizontal">
                         <ComboBox Width="120" Margin="20" HorizontalAlignment="Left" x:Name="comboSymbol" SelectionChanged="SelectionChanged" ></ComboBox>
                         <ComboBox Width="80" Margin="20" HorizontalAlignment="Left" x:Name="comboType" SelectionChanged="SelectionChanged" ></ComboBox>
                     </StackPanel>
-                    <DataGrid x:Name="dataGridSymbol" Height="380" Margin="20" IsReadOnly="True"/>
+                    <DataGrid x:Name="dataGridSymbol" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="20" IsReadOnly="True" MinHeight="380" MaxHeight="800" MinColumnWidth="80" >
+                    </DataGrid>
                 </StackPanel>
             </TabItem>
         </TabControl>

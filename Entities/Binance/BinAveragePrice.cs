@@ -8,8 +8,8 @@ namespace CoinManager.Entities.Binance
 {
     public class BinMarketPrice
     {
-        public double mins { get; set; }
+        public decimal mins { get; set; }
 
-        public double price { get; set; }
+        public decimal price { get; set; }
     }
 }

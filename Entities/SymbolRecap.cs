@@ -10,10 +10,10 @@ namespace CoinManager.Entities
     {
         public string Symbol { get; set; }
 
-        public double Valeur { get; set; }
+        public decimal Valeur { get; set; }
 
-        public double Nombre { get; set; }
-        public double Moyenne
+        public decimal Nombre { get; set; }
+        public decimal Moyenne
         {
             get
             {
@@ -24,7 +24,7 @@ namespace CoinManager.Entities
             }
         }
 
-        public double Cours { get; set; }
-        public double Difference { get; set; }
+        public decimal Cours { get; set; }
+        public decimal Difference { get; set; }
     }
 }

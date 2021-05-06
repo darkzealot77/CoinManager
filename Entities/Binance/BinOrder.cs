@@ -19,16 +19,16 @@ namespace CoinManager.Entities.Binance
         public string ClientOrderId { get; set; }
 
         [JsonProperty("price")]
-        public string Price { get; set; }
+        public decimal Price { get; set; }
 
         [JsonProperty("origQty")]
-        public string OrigQty { get; set; }
+        public decimal OrigQty { get; set; }
 
         [JsonProperty("executedQty")]
-        public string ExecutedQty { get; set; }
+        public decimal ExecutedQty { get; set; }
 
         [JsonProperty("cummulativeQuoteQty")]
-        public string CummulativeQuoteQty { get; set; }
+        public decimal CummulativeQuoteQty { get; set; }
 
         [JsonProperty("status")]
         public string Status { get; set; }
@@ -43,10 +43,10 @@ namespace CoinManager.Entities.Binance
         public string Side { get; set; }
 
         [JsonProperty("stopPrice")]
-        public string StopPrice { get; set; }
+        public decimal StopPrice { get; set; }
 
         [JsonProperty("icebergQty")]
-        public string IcebergQty { get; set; }
+        public decimal IcebergQty { get; set; }
 
         [JsonProperty("time")]
         public long Time { get; set; }
@@ -58,6 +58,6 @@ namespace CoinManager.Entities.Binance
         public bool IsWorking { get; set; }
 
         [JsonProperty("origQuoteOrderQty")]
-        public string OrigQuoteOrderQty { get; set; }
+        public decimal OrigQuoteOrderQty { get; set; }
     }
 }

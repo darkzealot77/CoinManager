@@ -6,6 +6,7 @@ using CoinManager.Services;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -114,8 +115,7 @@ namespace CoinBase
                 {
                     foreach (var order in symbolOrders.Value)
                     {
-                        if (status == "TOUT" || order.Value.Status == status)
-                            lignes.Add(new OrderGridRow(order.Value));
+                        FillRowOrder(lignes, status, order);
                     }
                 }
             }
@@ -123,12 +123,17 @@ namespace CoinBase
             {
                 foreach (var order in AllOrders[symbol])
                 {
-                    if (status == "TOUT" || order.Value.Status == status)
-                        lignes.Add(new OrderGridRow(order.Value));
+                    FillRowOrder(lignes, status, order);
                 }
             }
 
             dataGridSymbol.ItemsSource = lignes;
+        }
+
+        private void FillRowOrder(List<OrderGridRow> lignes, string status, KeyValuePair<long, BinOrder> order)
+        {
+            if (status == "TOUT" || order.Value.Status == status)
+                lignes.Add(new OrderGridRow(order.Value, AllRecap[order.Value.Symbol].Cours));
         }
         #endregion
 
@@ -247,13 +252,13 @@ namespace CoinBase
 
                     if (binOrder.Side == "BUY" && binOrder.Status == "FILLED")
                     {
-                        symbolRecap.Nombre += double.Parse(binOrder.ExecutedQty.Replace(".", ","));
-                        symbolRecap.Valeur += double.Parse(binOrder.CummulativeQuoteQty.Replace(".", ","));
+                        symbolRecap.Nombre += binOrder.ExecutedQty;
+                        symbolRecap.Valeur += binOrder.CummulativeQuoteQty;
                     }
                     else if (binOrder.Side == "SELL" && binOrder.Status == "FILLED")
                     {
-                        symbolRecap.Nombre -= double.Parse(binOrder.ExecutedQty.Replace(".", ","));
-                        symbolRecap.Valeur -= double.Parse(binOrder.CummulativeQuoteQty.Replace(".", ","));
+                        symbolRecap.Nombre -= binOrder.ExecutedQty;
+                        symbolRecap.Valeur -= binOrder.CummulativeQuoteQty;
                     }
                 }
 
