@@ -27,7 +27,21 @@ namespace CoinManager.Entities
 
         public string Side { get; set; }
 
-        public long Time { get; set; }
+        public string TimeStr { get; set; }
+
+        private DateTime _time;
+        private DateTime Time 
+        {
+            get
+            {
+                return _time;
+            }
+            set
+            {
+                _time = value;
+                TimeStr = _time.ToString("dd/MM/yyyy HH:mm:ss");
+            }
+        }
 
         public string OrigQuoteOrderQty { get; set; }
 
@@ -42,7 +56,7 @@ namespace CoinManager.Entities
             Status = order.Status;
             Type = order.Type;
             Side = order.Side;
-            Time = order.Time;
+            Time = new DateTime(1970, 01,01).AddMilliseconds(order.Time);
             OrigQuoteOrderQty = order.OrigQuoteOrderQty;
         }
     }

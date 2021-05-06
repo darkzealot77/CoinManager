@@ -32,6 +32,8 @@ namespace CoinBase
         IConfiguration Configuration;
         List<string> SymbolList { get; set; } = new List<string>();
 
+        public const string TOUT = "TOUT";
+
         public DicoOrders AllOrders { get; set; }
         public Dictionary<string, SymbolRecap> AllRecap { get; set; } = new Dictionary<string, SymbolRecap>();
 
@@ -61,9 +63,77 @@ namespace CoinBase
             Calculate();
 
             ShowRecap();
+
+            LoadAllOrdersTabItem();
+        }
+
+        #region Orders Tab Item
+        private void LoadAllOrdersTabItem()
+        {
+            LoadComboSymbol();
+            LoadComboType();
+        }
+
+        private void LoadComboType()
+        {
+            comboType.Items.Clear();
+            comboType.Items.Add(TOUT);
+            comboType.Items.Add("FILLED");
+            comboType.Items.Add("NEW");
+            comboType.Items.Add("CANCELED");
+        }
+
+        private void LoadComboSymbol()
+        {
+            comboSymbol.Items.Clear();
+            comboSymbol.Items.Add(TOUT);
+
+            foreach (string symbol in SymbolList)
+            {
+                comboSymbol.Items.Add(symbol);
+            }
+        }
+
+        private void SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
             ShowOrder();
         }
 
+        private void ShowOrder()
+        {
+            if (comboType.SelectedItem == null)
+                return;
+
+            List<OrderGridRow> lignes = new List<OrderGridRow>();
+            string symbol = comboSymbol.SelectedItem.ToString();
+            string status = comboType.SelectedItem.ToString();
+
+            if (symbol == TOUT)
+            {
+                foreach (var symbolOrders in AllOrders)
+                {
+                    foreach (var order in symbolOrders.Value)
+                    {
+                        if (status == "TOUT" || order.Value.Status == status)
+                            lignes.Add(new OrderGridRow(order.Value));
+                    }
+                }
+            }
+            else
+            {
+                foreach (var order in AllOrders[symbol])
+                {
+                    if (status == "TOUT" || order.Value.Status == status)
+                        lignes.Add(new OrderGridRow(order.Value));
+                }
+            }
+
+            dataGridSymbol.ItemsSource = lignes;
+        }
+        #endregion
+
+
+        #region Recap Tab Item
         private async void ButtonOrders_Click(object sender, RoutedEventArgs e)
         {
             await GetTrades();
@@ -75,8 +145,6 @@ namespace CoinBase
             await GetMarketPrice();
 
             ShowRecap();
-
-            ShowOrder();
         }
 
 
@@ -165,21 +233,6 @@ namespace CoinBase
             }
         }
 
-        private void ShowOrder()
-        {
-            List<OrderGridRow> lignes = new List<OrderGridRow>();
-
-            foreach (var symbolOrders in AllOrders)
-            {
-                foreach (var order in symbolOrders.Value)
-                {
-                    lignes.Add(new OrderGridRow(order.Value));
-                }
-            }
-
-            dataGridOrder.ItemsSource = lignes;
-        }
-
         private void Calculate()
         {
             foreach (var pair in AllOrders)
@@ -203,8 +256,16 @@ namespace CoinBase
                         symbolRecap.Valeur -= double.Parse(binOrder.CummulativeQuoteQty.Replace(".", ","));
                     }
                 }
+
+                if (symbolRecap.Nombre < 0)
+                {
+                    symbolRecap.Nombre = 0;
+                    symbolRecap.Valeur = 0;
+                }
             }
         }
+
+        #endregion
 
         private void DisableAllRequest()
         {

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace CoinManager.Entities
 {
+    // Symbol, (orderId, order)
     public class DicoOrders : Dictionary<string, Dictionary<long, BinOrder>>
     {
 

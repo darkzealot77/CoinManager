@@ -15,11 +15,15 @@
         <TabControl>
             <TabItem Header="Recap">
                 <StackPanel x:Name="stackRecap" Margin="10" Height="500">
-                </StackPanel>   
+                </StackPanel>
             </TabItem>
             <TabItem Header="Tous les ordres">
-                <StackPanel x:Name="stackOrdre" Margin="10" Height="480">
-                    <DataGrid x:Name="dataGridOrder" Height="480"/>
+                <StackPanel x:Name="stackSymbol" Margin="10" Height="480">
+                    <StackPanel Orientation="Horizontal">
+                        <ComboBox Width="120" Margin="20" HorizontalAlignment="Left" x:Name="comboSymbol" SelectionChanged="SelectionChanged" ></ComboBox>
+                        <ComboBox Width="80" Margin="20" HorizontalAlignment="Left" x:Name="comboType" SelectionChanged="SelectionChanged" ></ComboBox>
+                    </StackPanel>
+                    <DataGrid x:Name="dataGridSymbol" Height="380" Margin="20" IsReadOnly="True"/>
                 </StackPanel>
             </TabItem>
         </TabControl>
