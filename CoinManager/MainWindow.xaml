@@ -26,6 +26,8 @@
                         <Label Margin="0,20,0,20" x:Name="NombreLabel" Width="100"></Label>
                         <Label Margin="30,20,20,20">Moyenne :</Label>
                         <Label Margin="0,20,0,20" x:Name="MoyenneLabel" Width="100"></Label>
+                        <Label Margin="30,20,20,20">Difference :</Label>
+                        <Label Margin="0,20,0,20" x:Name="DifferenceLabel" Width="100"></Label>
                     </StackPanel>
                     <DataGrid x:Name="dataGridSymbol" HorizontalAlignment="Stretch" Margin="20" IsReadOnly="True" MinColumnWidth="80" Height="585" />
                 </StackPanel>

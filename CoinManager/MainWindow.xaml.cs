@@ -135,8 +135,9 @@ namespace CoinBase
                     FillRowOrder(lignes, status, order);
                 }
 
-                NombreLabel.Content = AllRecap[symbol].Nombre.ToString("0.000");
-                MoyenneLabel.Content = AllRecap[symbol].Moyenne.ToString("0.000");
+                NombreLabel.Content = AllRecap[symbol].Nombre.ToString("0.0000");
+                MoyenneLabel.Content = AllRecap[symbol].Moyenne.ToString("0.0000");
+                DifferenceLabel.Content = AllRecap[symbol].Difference.ToString("0.0000");
             }
 
             dataGridSymbol.ItemsSource = lignes;
