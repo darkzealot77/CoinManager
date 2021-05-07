@@ -6,15 +6,15 @@
         xmlns:local="clr-namespace:CoinBase"
         xmlns:Component="clr-namespace:CoinManager.Component" x:Class="CoinBase.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="900" WindowStartupLocation="CenterScreen">
+        Title="MainWindow" Height="800" Width="1000" WindowStartupLocation="CenterScreen" ResizeMode="CanMinimize">
     <StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="center">
             <Button x:Name="ButtonOrders" Content="Recup tous les ordres" Margin="10" VerticalAlignment="Top" Click="ButtonOrders_Click" Width="170"/>
             <Button x:Name="ButtonPrices" Content="Recup tous les prix" Margin="10" VerticalAlignment="Top" Click="ButtonPrices_Click" Width="170"/>
         </StackPanel>
-        <TabControl VerticalAlignment="Stretch">
+        <TabControl Height="744">
             <TabItem Header="Recap">
-                <StackPanel x:Name="stackRecap" Margin="10" Height="500">
+                <StackPanel x:Name="stackRecap" Margin="10" VerticalAlignment="Stretch">
                 </StackPanel>
             </TabItem>
             <TabItem Header="Tous les ordres">
@@ -22,9 +22,12 @@
                     <StackPanel Orientation="Horizontal">
                         <ComboBox Width="120" Margin="20" HorizontalAlignment="Left" x:Name="comboSymbol" SelectionChanged="SelectionChanged" ></ComboBox>
                         <ComboBox Width="80" Margin="20" HorizontalAlignment="Left" x:Name="comboType" SelectionChanged="SelectionChanged" ></ComboBox>
+                        <Label Margin="0,20,0,20">Nombre :</Label>
+                        <Label Margin="0,20,0,20" x:Name="NombreLabel" Width="100"></Label>
+                        <Label Margin="30,20,20,20">Moyenne :</Label>
+                        <Label Margin="0,20,0,20" x:Name="MoyenneLabel" Width="100"></Label>
                     </StackPanel>
-                    <DataGrid x:Name="dataGridSymbol" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="20" IsReadOnly="True" MinHeight="380" MaxHeight="800" MinColumnWidth="80" >
-                    </DataGrid>
+                    <DataGrid x:Name="dataGridSymbol" HorizontalAlignment="Stretch" Margin="20" IsReadOnly="True" MinColumnWidth="80" Height="585" />
                 </StackPanel>
             </TabItem>
         </TabControl>

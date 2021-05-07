@@ -25,7 +25,7 @@ namespace CoinManager.Entities
 
         public string Status { get; set; }
 
-        public decimal _nombre { get; set; }
+        private decimal _nombre { get; set; }
         public string Nombre { get; set; }
 
         public string Valeur { get; set; }
@@ -48,8 +48,8 @@ namespace CoinManager.Entities
             Price = order.Price;
             //OrigQty = order.OrigQty;
             _nombre = order.ExecutedQty;
-            Nombre = _nombre.ToString("0.0000");
-            Valeur = order.CummulativeQuoteQty.ToString("0.0000");
+            Nombre = _nombre.ToString("0.00");
+            Valeur = order.CummulativeQuoteQty.ToString("0.00");
             Status = order.Status;
             //Type = order.Type;
             Action = order.Side;

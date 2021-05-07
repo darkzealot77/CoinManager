@@ -61,6 +61,8 @@ namespace CoinBase
             if (AllOrders == null)
                 AllOrders = new DicoOrders();
 
+            GetMarketPrice().GetAwaiter().GetResult();
+
             Calculate();
 
             ShowRecap();
@@ -82,6 +84,8 @@ namespace CoinBase
             comboType.Items.Add("FILLED");
             comboType.Items.Add("NEW");
             comboType.Items.Add("CANCELED");
+
+            comboType.SelectedIndex = 1;
         }
 
         private void LoadComboSymbol()
@@ -93,6 +97,8 @@ namespace CoinBase
             {
                 comboSymbol.Items.Add(symbol);
             }
+
+            comboSymbol.SelectedIndex = 0;
         }
 
         private void SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -111,6 +117,9 @@ namespace CoinBase
 
             if (symbol == TOUT)
             {
+                NombreLabel.Content = " - ";
+                MoyenneLabel.Content = " - ";
+
                 foreach (var symbolOrders in AllOrders)
                 {
                     foreach (var order in symbolOrders.Value)
@@ -125,6 +134,9 @@ namespace CoinBase
                 {
                     FillRowOrder(lignes, status, order);
                 }
+
+                NombreLabel.Content = AllRecap[symbol].Nombre.ToString("0.000");
+                MoyenneLabel.Content = AllRecap[symbol].Moyenne.ToString("0.000");
             }
 
             dataGridSymbol.ItemsSource = lignes;
@@ -221,7 +233,6 @@ namespace CoinBase
                     SymbolRecap symbolRecap = AllRecap[pair.Key];
 
                     symbolRecap.Cours = returnObject.Value.price;
-                    symbolRecap.Difference = (symbolRecap.Cours * symbolRecap.Nombre) - (symbolRecap.Moyenne * symbolRecap.Nombre);
                 }
             }
         }
@@ -246,27 +257,29 @@ namespace CoinBase
                 symbolRecap.Nombre = 0;
                 symbolRecap.Valeur = 0;
 
-                foreach (var pairOrder in pair.Value)
-                {
-                    BinOrder binOrder = pairOrder.Value;
+                List<BinOrder> orders = pair.Value.Select(o => o.Value).OrderBy(o => o.Time).ToList();
 
-                    if (binOrder.Side == "BUY" && binOrder.Status == "FILLED")
+                foreach (BinOrder order in orders)
+                {
+                    if (order.Side == "BUY" && order.Status == "FILLED")
                     {
-                        symbolRecap.Nombre += binOrder.ExecutedQty;
-                        symbolRecap.Valeur += binOrder.CummulativeQuoteQty;
+                        symbolRecap.Nombre += order.ExecutedQty;
+                        symbolRecap.Valeur += order.CummulativeQuoteQty;
                     }
-                    else if (binOrder.Side == "SELL" && binOrder.Status == "FILLED")
+                    else if (order.Side == "SELL" && order.Status == "FILLED")
                     {
-                        symbolRecap.Nombre -= binOrder.ExecutedQty;
-                        symbolRecap.Valeur -= binOrder.CummulativeQuoteQty;
+                        symbolRecap.Nombre -= order.ExecutedQty;
+                        symbolRecap.Valeur -= order.CummulativeQuoteQty;
+                    }
+
+                    if (symbolRecap.Nombre < 0)
+                    {
+                        symbolRecap.Nombre = 0;
+                        symbolRecap.Valeur = 0;
                     }
                 }
 
-                if (symbolRecap.Nombre < 0)
-                {
-                    symbolRecap.Nombre = 0;
-                    symbolRecap.Valeur = 0;
-                }
+                symbolRecap.Difference = (symbolRecap.Cours * symbolRecap.Nombre) - (symbolRecap.Moyenne * symbolRecap.Nombre);
             }
         }
 
