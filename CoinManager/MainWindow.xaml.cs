@@ -269,8 +269,9 @@ namespace CoinBase
                     }
                     else if (order.Side == "SELL" && order.Status == "FILLED")
                     {
+                        decimal oldMoyenne = symbolRecap.Moyenne;
                         symbolRecap.Nombre -= order.ExecutedQty;
-                        symbolRecap.Valeur -= order.CummulativeQuoteQty;
+                        symbolRecap.Moyenne = oldMoyenne;
                     }
 
                     if (symbolRecap.Nombre < 0)

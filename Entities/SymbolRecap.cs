@@ -22,6 +22,11 @@ namespace CoinManager.Entities
                 else
                     return 0;
             }
+
+            set
+            {
+                Valeur = value * Nombre;
+            }
         }
 
         public decimal Cours { get; set; }

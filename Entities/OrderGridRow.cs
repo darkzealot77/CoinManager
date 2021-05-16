@@ -61,12 +61,15 @@ namespace CoinManager.Entities
 
             Prix = Price.ToString("0.0000");
 
-            if (Price > coursActu)
-                CoursDown = coursActu.ToString("0.0000");
-            else
-                CoursUP = coursActu.ToString("0.0000");
+            if (Action == "BUY")
+            {
+                if (Price > coursActu)
+                    CoursDown = coursActu.ToString("0.0000");
+                else
+                    CoursUP = coursActu.ToString("0.0000");
 
-            Difference = ((coursActu * _nombre) - (Price * _nombre)).ToString("0.0000");
+                Difference = ((coursActu * _nombre) - (Price * _nombre)).ToString("0.0000");
+            }
         }
     }
 }
