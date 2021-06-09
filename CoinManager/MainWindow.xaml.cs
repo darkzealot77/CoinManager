@@ -262,12 +262,12 @@ namespace CoinBase
 
                 foreach (BinOrder order in orders)
                 {
-                    if (order.Side == "BUY" && order.Status == "FILLED")
+                    if ((order.Side == "BUY" || order.Side == "CANCELED") && order.Status == "FILLED")
                     {
                         symbolRecap.Nombre += order.ExecutedQty;
                         symbolRecap.Valeur += order.CummulativeQuoteQty;
                     }
-                    else if (order.Side == "SELL" && order.Status == "FILLED")
+                    else if ((order.Side == "SELL" || order.Side == "CANCELED") && order.Status == "FILLED")
                     {
                         decimal oldMoyenne = symbolRecap.Moyenne;
                         symbolRecap.Nombre -= order.ExecutedQty;
